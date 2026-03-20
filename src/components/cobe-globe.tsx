@@ -4,6 +4,7 @@ import type { MarkerPoint } from "../types";
 
 type Props = {
   markers: MarkerPoint[];
+  onSeerClick?: () => void;
 };
 
 const GLOBE_R = 0.8;
@@ -154,15 +155,20 @@ function placePulseElement(
   element.style.filter = projected.visible ? "none" : "blur(3px)";
 }
 
-export function CobeGlobe({ markers }: Props) {
+export function CobeGlobe({ markers, onSeerClick }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const markersRef = useRef<MarkerPoint[]>(markers);
+  const onSeerClickRef = useRef(onSeerClick);
   const pulsesDirtyRef = useRef(true);
 
   useEffect(() => {
     markersRef.current = markers;
     pulsesDirtyRef.current = true;
   }, [markers]);
+
+  useEffect(() => {
+    onSeerClickRef.current = onSeerClick;
+  }, [onSeerClick]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -229,6 +235,7 @@ export function CobeGlobe({ markers }: Props) {
     ufoEl.className = "ufo-marker";
     ufoEl.innerHTML = '<img class="ufo-seer" src="/seer.png" alt="Seer" />';
     pulseLayer.append(ufoEl);
+    const ufoImage = ufoEl.querySelector<HTMLImageElement>(".ufo-seer");
 
     const pulseEls = new Map<string, HTMLDivElement>();
 
@@ -334,7 +341,25 @@ export function CobeGlobe({ markers }: Props) {
       phi += delta * POINTER_ROTATION_FACTOR;
     };
 
+    const onSeerImageClick = (event: MouseEvent) => {
+      event.stopPropagation();
+      if (!ufoImage) {
+        return;
+      }
+
+      ufoImage.classList.remove("ufo-seer--wiggle");
+      void ufoImage.offsetWidth;
+      ufoImage.classList.add("ufo-seer--wiggle");
+      onSeerClickRef.current?.();
+    };
+
+    const onSeerAnimationEnd = () => {
+      ufoImage?.classList.remove("ufo-seer--wiggle");
+    };
+
     canvas.style.cursor = "grab";
+    ufoImage?.addEventListener("click", onSeerImageClick);
+    ufoImage?.addEventListener("animationend", onSeerAnimationEnd);
     canvas.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointermove", onPointerMove);
@@ -344,6 +369,8 @@ export function CobeGlobe({ markers }: Props) {
       canvas.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointermove", onPointerMove);
+      ufoImage?.removeEventListener("click", onSeerImageClick);
+      ufoImage?.removeEventListener("animationend", onSeerAnimationEnd);
       window.cancelAnimationFrame(frame);
       ufoEl.remove();
       pulseLayer.remove();

@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Toaster, toast } from "sonner";
 import { CobeGlobe } from "./components/cobe-globe";
+import { SeerToast } from "./components/seer-toast";
 import { useEventStream } from "./hooks/use-event-stream";
 
 function formatCoordinate(
@@ -13,13 +15,54 @@ function formatCoordinate(
 function App() {
   const { sampledLabel, feed, markers, isConnected } = useEventStream();
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  const onSeerClick = () => {
+    toast.custom(
+      () => (
+        <SeerToast
+          onAction={() => {
+            window.open(
+              "https://sentry.io/product/seer/?original_referrer=https://live.sentry.io",
+              "_blank",
+              "noopener,noreferrer",
+            );
+          }}
+          onClose={() => {
+            toast.dismiss("seer-info");
+          }}
+        />
+      ),
+      {
+        id: "seer-info",
+        duration: 9000,
+        unstyled: true,
+        classNames: {
+          toast: "!border-0 !bg-transparent !p-0 !shadow-none",
+          content: "!p-0",
+          description: "!hidden",
+        },
+      },
+    );
+  };
 
   return (
     <div className="app-shell">
       <div className="orbital-glow" />
       <div className="globe-wrap">
-        <CobeGlobe markers={markers} />
+        <CobeGlobe markers={markers} onSeerClick={onSeerClick} />
       </div>
 
       <main className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4">
@@ -106,6 +149,12 @@ function App() {
           {`\u00A9 ${currentYear} Sentry`}
         </p>
       </main>
+
+      <Toaster
+        position="top-right"
+        offset={isMobile ? { top: "5.4rem", right: "0.8rem" } : { top: "5rem", right: "1rem" }}
+        visibleToasts={1}
+      />
     </div>
   );
 }
