@@ -1,18 +1,16 @@
-# Sentry Live Orbital (Vite + React + Hono + Cloudflare Workers)
+# Sentry Live Orbital (Vite + React + Hono on Bun)
 
-This project recreates the live orbital visualization style with:
+Orbital-style live globe visualization built with:
 
-- Vite + React frontend
-- `cobe` for the globe rendering
-- Hono API on Cloudflare Workers
-- Durable Object fanout for SSE streaming
-- built-in simulated event generator
-- default upstream SSE stream from Sentry Orbital (`https://sentry.live/stream`)
+- Vite + React + Tailwind frontend
+- Hono API integrated with Vite dev server
+- Bun runtime for local and production server
+- Docker for production deployment
 
 ## Requirements
 
 - Bun 1.0+
-- Cloudflare account + Wrangler auth for deploy
+- Docker (for containerized production)
 
 ## Install
 
@@ -20,26 +18,18 @@ This project recreates the live orbital visualization style with:
 bun install
 ```
 
-## Local development
+## Development
 
-Run both the Worker API and Vite frontend together:
+Single-process development (frontend + API together):
 
 ```bash
-bun run dev:all
+bun run dev
 ```
 
-This starts:
+This serves:
 
-- Vite on `http://localhost:5173`
-- Worker on `http://127.0.0.1:8787`
-
-Vite proxies `/api/*` to the Worker.
-
-By default the frontend connects directly to the Orbital-style SSE endpoint:
-
-- `https://sentry.live/stream`
-
-If that external stream is unavailable, the app falls back to local Worker stream (`/api/stream`).
+- App UI
+- API routes under `/api/*`
 
 ## API routes
 
@@ -49,14 +39,6 @@ If that external stream is unavailable, the app falls back to local Worker strea
 - `POST /api/simulate/start`
 - `POST /api/simulate/stop`
 - `GET /api/simulate/status`
-
-## Changing upstream stream URL
-
-Set this env var for frontend if you want a different upstream SSE source:
-
-```bash
-VITE_SENTRY_ORBITAL_STREAM_URL=https://your-stream.example.com/stream
-```
 
 Event payload shape:
 
@@ -69,17 +51,35 @@ Event payload shape:
 }
 ```
 
-## Build and checks
+## Build
 
 ```bash
-bun run lint
 bun run build
 ```
 
-## Deploy
+Output:
+
+- `dist/index.js` (Bun server)
+- `dist/static/*` (frontend assets)
+
+Run built server:
 
 ```bash
-bun run deploy
+bun run start
 ```
 
-Durable Object binding is configured in `wrangler.jsonc` with class `OrbitalHub`.
+Default port: `7000` (override with `PORT`).
+
+## Docker
+
+Build image:
+
+```bash
+docker build -t sentry-live-orbital .
+```
+
+Run container:
+
+```bash
+docker run --rm -p 7000:7000 sentry-live-orbital
+```

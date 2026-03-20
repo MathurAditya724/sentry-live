@@ -11,16 +11,11 @@ function formatCoordinate(
 }
 
 function App() {
-  const { sampledLabel, feed, markers, isConnected, usesExternalStream, streamUrl } =
-    useEventStream();
+  const { sampledLabel, feed, markers, isConnected } = useEventStream();
   const [collapsed, setCollapsed] = useState(false);
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    if (usesExternalStream) {
-      return;
-    }
-
     fetch("/api/simulate/status")
       .then(async (response) => {
         if (!response.ok) {
@@ -41,13 +36,9 @@ function App() {
       .catch(() => {
         setRunning(false);
       });
-  }, [usesExternalStream]);
+  }, []);
 
   const toggleSimulation = async () => {
-    if (usesExternalStream) {
-      return;
-    }
-
     const route = running ? "/api/simulate/stop" : "/api/simulate/start";
 
     const response = await fetch(route, { method: "POST" });
@@ -104,22 +95,13 @@ function App() {
                 events sampled
               </p>
             </div>
-            {usesExternalStream ? (
-              <span
-                className="rounded-[9px] border border-emerald-300/30 bg-emerald-300/10 px-2.5 py-1.5 text-[0.72rem] text-emerald-100"
-                title={streamUrl}
-              >
-                Upstream stream
-              </span>
-            ) : (
-              <button
-                type="button"
-                className="cursor-pointer rounded-[9px] border border-white/20 bg-white/5 px-2.5 py-1.5 text-[0.73rem] text-[#f1eef9]/90 transition hover:border-white/30 hover:bg-white/10"
-                onClick={toggleSimulation}
-              >
-                {running ? "Pause simulation" : "Resume simulation"}
-              </button>
-            )}
+            <button
+              type="button"
+              className="cursor-pointer rounded-[9px] border border-white/20 bg-white/5 px-2.5 py-1.5 text-[0.73rem] text-[#f1eef9]/90 transition hover:border-white/30 hover:bg-white/10"
+              onClick={toggleSimulation}
+            >
+              {running ? "Pause simulation" : "Resume simulation"}
+            </button>
           </div>
         </header>
 

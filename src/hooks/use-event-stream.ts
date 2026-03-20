@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { stream } from "fetch-event-stream";
 import type { FeedItem, MarkerPoint, OrbitalEvent } from "../types";
 
 const PLATFORM_COLORS: Record<string, [number, number, number]> = {
@@ -23,8 +24,6 @@ const MARKER_TTL_MS = 2_600;
 const MARKER_RATE_MS = 170;
 const MARKER_MAX_PER_MESSAGE = 3;
 const MOBILE_WIDTH = 640;
-const EXTERNAL_STREAM_URL =
-  import.meta.env.VITE_SENTRY_ORBITAL_STREAM_URL ?? "https://sentry.live/stream";
 const WATCHDOG_MS = 5000;
 const RETRY_MS = 3000;
 
@@ -140,12 +139,10 @@ export function useEventStream() {
   const [markers, setMarkers] = useState<MarkerPoint[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-  const [streamUrl, setStreamUrl] = useState(EXTERNAL_STREAM_URL);
-  const [usesExternalStream, setUsesExternalStream] = useState(true);
   const [reconnectTick, setReconnectTick] = useState(0);
 
   useEffect(() => {
-    const source = new EventSource(streamUrl);
+    let sourceAbort: AbortController | null = null;
     let lastMarkerAt = Date.now();
     let watchdogTimer: ReturnType<typeof setTimeout> | null = null;
     let closed = false;
@@ -166,7 +163,7 @@ export function useEventStream() {
         if (closed) {
           return;
         }
-        source.close();
+        sourceAbort?.abort();
         setReconnectTick((tick) => tick + 1);
       }, delay);
     };
@@ -182,21 +179,10 @@ export function useEventStream() {
       }, WATCHDOG_MS);
     };
 
-    source.onopen = () => {
-      setIsConnected(true);
-      resetWatchdog();
-    };
-
-    source.onerror = () => {
-      setIsConnected(false);
-    };
-
-    source.onmessage = (message) => {
-      resetWatchdog();
-
+    const handleMessage = (data: string) => {
       let parsed: unknown;
       try {
-        parsed = JSON.parse(message.data);
+        parsed = JSON.parse(data);
       } catch {
         return;
       }
@@ -242,29 +228,57 @@ export function useEventStream() {
       });
     };
 
+    const connect = async () => {
+      sourceAbort = new AbortController();
+
+      try {
+        const iterator = await stream("/api/stream", {
+          method: "GET",
+          headers: { Accept: "text/event-stream" },
+          signal: sourceAbort.signal,
+        });
+
+        if (closed) {
+          return;
+        }
+
+        setIsConnected(true);
+        resetWatchdog();
+
+        for await (const event of iterator) {
+          if (closed) {
+            break;
+          }
+
+          resetWatchdog();
+          if (!event.data) {
+            continue;
+          }
+
+          handleMessage(event.data);
+        }
+      } catch {
+        if (!closed) {
+          setIsConnected(false);
+          forceReconnect(RETRY_MS);
+        }
+        return;
+      }
+
+      if (!closed) {
+        setIsConnected(false);
+        forceReconnect(RETRY_MS);
+      }
+    };
+
+    connect();
+
     return () => {
       closed = true;
       clearTimers();
-      source.close();
+      sourceAbort?.abort();
     };
-  }, [streamUrl, reconnectTick]);
-
-  useEffect(() => {
-    if (streamUrl !== EXTERNAL_STREAM_URL) {
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      if (!isConnected) {
-        setStreamUrl("/api/stream");
-        setUsesExternalStream(false);
-      }
-    }, 3500);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [isConnected, streamUrl]);
+  }, [reconnectTick]);
 
   useEffect(() => {
     const cleanup = setInterval(() => {
@@ -285,7 +299,5 @@ export function useEventStream() {
     markers,
     feed,
     isConnected,
-    usesExternalStream,
-    streamUrl,
   };
 }
