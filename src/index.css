@@ -208,3 +208,9 @@ body::after {
     opacity: 0.72;
   }
 }
+
+@media (max-width: 768px) {
+  .live-feed-panel {
+    margin-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}

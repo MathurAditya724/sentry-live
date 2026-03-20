@@ -67,7 +67,7 @@ function App() {
           </div>
         </header>
 
-        <aside className="pointer-events-auto w-full overflow-hidden rounded-xl border border-[#9e75ff]/30 bg-[#0a0813]/70 backdrop-blur-xl md:max-w-[350px] md:self-end">
+        <aside className="live-feed-panel pointer-events-auto w-full overflow-hidden rounded-xl border border-[#9e75ff]/30 bg-[#0a0813]/70 backdrop-blur-xl md:max-w-[350px] md:self-end">
           <button
             type="button"
             className="flex w-full cursor-pointer justify-between bg-white/5 px-3.5 py-2.5 text-xs tracking-[0.09em] text-[#f4f2fa] uppercase"
