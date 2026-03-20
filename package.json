@@ -4,12 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "bunx --bun vite",
     "build": "tsc -b && vite build --mode client && vite build && bun run build:instrument",
     "build:instrument": "bun build ./src/instrument.ts --target bun --outfile ./dist/instrument.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "PORT=${PORT:-7010} bun --preload ./dist/instrument.js dist/index.js",
+    "start": "bun --preload ./dist/instrument.js dist/index.js",
     "test:events": "bun scripts/send-test-events.ts"
   },
   "dependencies": {

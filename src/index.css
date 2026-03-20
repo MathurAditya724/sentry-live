@@ -20,6 +20,11 @@ body,
   margin: 0;
 }
 
+html {
+  background: #0b0815;
+  overscroll-behavior: none;
+}
+
 body {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
   color: var(--ink-1);
@@ -29,6 +34,8 @@ body {
     radial-gradient(circle at 88% 72%, rgb(38 119 157 / 24%) 0%, transparent 32%),
     linear-gradient(180deg, #05030a 0%, #0b0815 45%, #130d26 100%);
   overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 body::before,
@@ -114,8 +121,8 @@ body::after {
   top: 0;
   left: 0;
   translate: -50% -50%;
-  width: 34px;
-  height: 34px;
+  width: 21px;
+  height: 21px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,10 +158,10 @@ body::after {
 .event-pulse-ring {
   position: absolute;
   inset: 0;
-  border: 1.5px solid color-mix(in srgb, var(--pulse-color, #f4f2fa) 88%, transparent);
+  border: 5.2px solid color-mix(in srgb, var(--pulse-color, #f4f2fa) 88%, transparent);
   border-radius: 9999px;
   opacity: 0;
-  animation: pulse-expand 1.8s ease-out infinite;
+  animation: pulse-expand 2.2s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
   animation-delay: var(--delay, 0s);
 }
 
@@ -172,11 +179,14 @@ body::after {
 
 @keyframes pulse-expand {
   0% {
-    transform: scale(0.28);
-    opacity: 0.82;
+    transform: scale(0.22);
+    opacity: 0.7;
+  }
+  45% {
+    opacity: 0.48;
   }
   100% {
-    transform: scale(1.4);
+    transform: scale(1.95);
     opacity: 0;
   }
 }

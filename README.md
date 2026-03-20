@@ -39,8 +39,12 @@ Incoming UDP payload format:
 
 ```bash
 bun install
+cp .env.example .env.local
 bun run dev
 ```
+
+Environment config lives in `.env.local` (see `.env.example`).
+Bun and Vite both auto-load `.env*` files.
 
 To push test events into UDP ingest:
 
