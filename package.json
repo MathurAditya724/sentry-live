@@ -8,9 +8,10 @@
     "build": "tsc -b && vite build --mode client && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "PORT=${PORT:-7000} bun dist/index.js"
+    "start": "PORT=${PORT:-7000} bun --preload ./dist/instrument.js dist/index.js"
   },
   "dependencies": {
+    "@sentry/bun": "^10.45.0",
     "cobe": "^2.0.1",
     "fetch-event-stream": "^0.1.6",
     "hono": "^4.12.8",
