@@ -1,85 +1,60 @@
-# Sentry Live Orbital (Vite + React + Hono on Bun)
+# Sentry Live Orbital
 
-Orbital-style live globe visualization built with:
+`sentry-live` is a Bun + Hono + React recreation of the Sentry Orbital experience.
 
-- Vite + React + Tailwind frontend
-- Hono API integrated with Vite dev server
-- Bun runtime for local and production server
-- Docker for production deployment
+The project focuses on a live, globe-based event stream visualization that feels close to the original Orbital implementation:
 
-## Requirements
+- deep-space visual treatment
+- pulsing event markers on a rotating globe
+- Seer orbiting element
+- live event feed and sampled counter
 
-- Bun 1.0+
-- Docker (for containerized production)
+## Project idea
 
-## Install
+The core idea is to show live error activity as a global signal, not as a static dashboard.
+
+Instead of polling JSON APIs, the app follows the Orbital model:
+
+- UDP event ingest on `5556/udp`
+- server-side sampling
+- SSE fanout on `/stream`
+- browser-side rendering and lightweight UI overlays
+
+This keeps the architecture simple and real-time friendly for a single deployment unit.
+
+## Runtime model
+
+- **HTTP**: `7000/tcp` (UI + stream + health)
+- **UDP**: `5556/udp` (event ingest)
+- **SSE route**: `GET /stream`
+- **Health route**: `GET /healthz`
+
+Incoming UDP payload format:
+
+```json
+[37.8, -122.4, 1760000000000, "javascript"]
+```
+
+## Local run
 
 ```bash
 bun install
-```
-
-## Development
-
-Single-process development (frontend + API together):
-
-```bash
 bun run dev
 ```
 
-This serves:
-
-- App UI
-- API routes under `/api/*`
-
-## API routes
-
-- `GET /api/healthz`
-- `GET /api/stream` (SSE)
-- `POST /api/events`
-- `POST /api/simulate/start`
-- `POST /api/simulate/stop`
-- `GET /api/simulate/status`
-
-Event payload shape:
-
-```json
-{
-  "lat": 37.8,
-  "lng": -122.4,
-  "platform": "javascript",
-  "ts": 1760000000000
-}
-```
-
-## Build
+To push test events into UDP ingest:
 
 ```bash
-bun run build
+bun run test:events
 ```
 
-Output:
-
-- `dist/index.js` (Bun server)
-- `dist/static/*` (frontend assets)
-
-Run built server:
-
-```bash
-bun run start
-```
-
-Default port: `7000` (override with `PORT`).
-
-## Docker
-
-Build image:
+## Docker deployment
 
 ```bash
 docker build -t sentry-live-orbital .
+docker run --rm -p 7000:7000 -p 5556:5556/udp -e HOST=0.0.0.0 sentry-live-orbital
 ```
 
-Run container:
+## Contributing
 
-```bash
-docker run --rm -p 7000:7000 sentry-live-orbital
-```
+See `contribution.md` for setup, workflow, and PR guidance.

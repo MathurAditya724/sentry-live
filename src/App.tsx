@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CobeGlobe } from "./components/cobe-globe";
 import { useEventStream } from "./hooks/use-event-stream";
 
@@ -13,42 +13,7 @@ function formatCoordinate(
 function App() {
   const { sampledLabel, feed, markers, isConnected } = useEventStream();
   const [collapsed, setCollapsed] = useState(false);
-  const [running, setRunning] = useState(false);
   const currentYear = new Date().getFullYear();
-
-  useEffect(() => {
-    fetch("/api/simulate/status")
-      .then(async (response) => {
-        if (!response.ok) {
-          return null;
-        }
-        return (await response.json()) as { simulating?: boolean };
-      })
-      .then((status) => {
-        if (status?.simulating) {
-          setRunning(true);
-          return;
-        }
-
-        return fetch("/api/simulate/start", { method: "POST" }).then(
-          (response) => {
-            setRunning(response.ok);
-          },
-        );
-      })
-      .catch(() => {
-        setRunning(false);
-      });
-  }, []);
-
-  const toggleSimulation = async () => {
-    const route = running ? "/api/simulate/stop" : "/api/simulate/start";
-
-    const response = await fetch(route, { method: "POST" });
-    if (response.ok) {
-      setRunning((value) => !value);
-    }
-  };
 
   return (
     <div className="app-shell">
@@ -58,15 +23,15 @@ function App() {
       </div>
 
       <main className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4">
-        <header className="pointer-events-auto rounded-xl border border-white/15 bg-gradient-to-b from-[#0b0914]/65 to-[#0b0914]/45 px-4 py-3 backdrop-blur-xl max-md:flex max-md:flex-col max-md:items-start max-md:gap-3 md:grid md:grid-cols-[auto_1fr] md:items-center md:gap-3">
-          <div className="flex items-center gap-3.5 md:justify-self-center">
+        <header className="pointer-events-auto flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-gradient-to-b from-[#0b0914]/65 to-[#0b0914]/45 px-4 py-2.5 backdrop-blur-xl max-md:flex-col max-md:items-start max-md:gap-2.5">
+          <div className="flex items-center gap-3">
             <img
               src="/logo.svg"
               alt="Sentry"
               className="h-auto w-[clamp(76px,10vw,116px)] opacity-95"
             />
             <span className="h-6 w-px bg-white/20" aria-hidden="true" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <h1 className="m-0 text-base font-medium tracking-[0.01em]">
                 Live Orbital
               </h1>
@@ -89,22 +54,13 @@ function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 max-md:w-full max-md:flex-wrap max-md:justify-between md:justify-self-end">
-            <div>
-              <p className="m-0 text-right text-[1.04rem] leading-tight font-semibold">
+          <div className="max-md:w-full max-md:text-left md:text-right">
+            <p className="m-0 text-[1.04rem] leading-tight font-semibold">
                 {sampledLabel}
-              </p>
-              <p className="m-0 text-[0.61rem] tracking-[0.08em] text-[#e6e0f4]/65 uppercase">
-                events sampled
-              </p>
-            </div>
-            <button
-              type="button"
-              className="cursor-pointer rounded-[9px] border border-white/20 bg-white/5 px-2.5 py-1.5 text-[0.73rem] text-[#f1eef9]/90 transition hover:border-white/30 hover:bg-white/10"
-              onClick={toggleSimulation}
-            >
-              {running ? "Pause simulation" : "Resume simulation"}
-            </button>
+            </p>
+            <p className="m-0 text-[0.61rem] tracking-[0.08em] text-[#e6e0f4]/65 uppercase">
+              events sampled
+            </p>
           </div>
         </header>
 

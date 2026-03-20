@@ -14,9 +14,13 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=7000
+ENV HOST=0.0.0.0
+ENV UDP_PORT=5556
+ENV SAMPLE_RATE=0.05
 
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 7000
+EXPOSE 5556/udp
 
 CMD ["bun", "run", "start"]

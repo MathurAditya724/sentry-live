@@ -11,6 +11,8 @@ const MARKER_ELEVATION = 0.05;
 const GLOBE_THETA = 0.28;
 const GLOBE_AUTO_ROTATE_SPEED = 0.00145;
 const GLOBE_MARKER_SIZE = 0.02;
+const GLOBE_MAP_BRIGHTNESS = 5;
+const GLOBE_BASE_COLOR: [number, number, number] = [0.34, 0.24, 0.56];
 const PULSE_DELAY_STEP = 0.2;
 const PULSE_DELAY_COUNT = 6;
 const POINTER_VELOCITY_DAMPING = 0.92;
@@ -41,10 +43,20 @@ function latLonTo3D(lat: number, lon: number): [number, number, number] {
   const latRad = (lat * Math.PI) / 180;
   const lonRad = (lon * Math.PI) / 180 - Math.PI;
   const cosLat = Math.cos(latRad);
-  return [-cosLat * Math.cos(lonRad), Math.sin(latRad), cosLat * Math.sin(lonRad)];
+  return [
+    -cosLat * Math.cos(lonRad),
+    Math.sin(latRad),
+    cosLat * Math.sin(lonRad),
+  ];
 }
 
-function projectMarker(lat: number, lon: number, phi: number, theta: number, aspect: number) {
+function projectMarker(
+  lat: number,
+  lon: number,
+  phi: number,
+  theta: number,
+  aspect: number,
+) {
   const point = latLonTo3D(lat, lon);
   const r = GLOBE_R + MARKER_ELEVATION;
   const p0 = point[0] * r;
@@ -75,7 +87,10 @@ function randomRange(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
-function createPulseElement(marker: MarkerPoint, delay: number): HTMLDivElement {
+function createPulseElement(
+  marker: MarkerPoint,
+  delay: number,
+): HTMLDivElement {
   const element = document.createElement("div");
   element.className = "event-pulse";
   element.style.setProperty("--delay", `${delay}s`);
@@ -104,12 +119,18 @@ function syncPulseElements(
 
     let pulseEl = pulseEls.get(marker.id);
     if (!pulseEl) {
-      pulseEl = createPulseElement(marker, (index % PULSE_DELAY_COUNT) * PULSE_DELAY_STEP);
+      pulseEl = createPulseElement(
+        marker,
+        (index % PULSE_DELAY_COUNT) * PULSE_DELAY_STEP,
+      );
       pulseEls.set(marker.id, pulseEl);
       layer.append(pulseEl);
     }
 
-    pulseEl.style.setProperty("--delay", `${(index % PULSE_DELAY_COUNT) * PULSE_DELAY_STEP}s`);
+    pulseEl.style.setProperty(
+      "--delay",
+      `${(index % PULSE_DELAY_COUNT) * PULSE_DELAY_STEP}s`,
+    );
     pulseEl.style.setProperty("--pulse-color", colorToCss(marker.color));
   });
 
@@ -121,7 +142,11 @@ function syncPulseElements(
   }
 }
 
-function placePulseElement(element: HTMLDivElement, projected: Projection, viewport: ViewportState) {
+function placePulseElement(
+  element: HTMLDivElement,
+  projected: Projection,
+  viewport: ViewportState,
+) {
   const x = viewport.offsetX + projected.x * viewport.canvasWidth;
   const y = viewport.offsetY + projected.y * viewport.canvasHeight;
   element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -188,8 +213,8 @@ export function CobeGlobe({ markers }: Props) {
       dark: 1,
       diffuse: 1.15,
       mapSamples: 12000,
-      mapBrightness: 3,
-      baseColor: [0.26, 0.18, 0.42],
+      mapBrightness: GLOBE_MAP_BRIGHTNESS,
+      baseColor: GLOBE_BASE_COLOR,
       markerColor: [0.94, 0.73, 0.15],
       glowColor: [0.65, 0.47, 1],
       offset: [0, 0],
@@ -212,7 +237,10 @@ export function CobeGlobe({ markers }: Props) {
     let ufoLng = -180;
     let ufoLat = randomRange(UFO_LATITUDE_MIN, UFO_LATITUDE_MAX);
     let ufoTargetLat = randomRange(UFO_LATITUDE_MIN, UFO_LATITUDE_MAX);
-    let ufoAngularSpeed = randomRange(UFO_ANGULAR_SPEED_MIN, UFO_ANGULAR_SPEED_MAX);
+    let ufoAngularSpeed = randomRange(
+      UFO_ANGULAR_SPEED_MIN,
+      UFO_ANGULAR_SPEED_MAX,
+    );
 
     const loop = () => {
       const now = performance.now();
@@ -249,7 +277,13 @@ export function CobeGlobe({ markers }: Props) {
           continue;
         }
 
-        const projected = projectMarker(marker.lat, marker.lng, phi, GLOBE_THETA, aspect);
+        const projected = projectMarker(
+          marker.lat,
+          marker.lng,
+          phi,
+          GLOBE_THETA,
+          aspect,
+        );
         placePulseElement(el, projected, viewport);
       }
 
@@ -257,11 +291,20 @@ export function CobeGlobe({ markers }: Props) {
       if (ufoLng > 180) {
         ufoLng -= 360;
         ufoTargetLat = randomRange(UFO_LATITUDE_MIN, UFO_LATITUDE_MAX);
-        ufoAngularSpeed = randomRange(UFO_ANGULAR_SPEED_MIN, UFO_ANGULAR_SPEED_MAX);
+        ufoAngularSpeed = randomRange(
+          UFO_ANGULAR_SPEED_MIN,
+          UFO_ANGULAR_SPEED_MAX,
+        );
       }
 
       ufoLat += (ufoTargetLat - ufoLat) * UFO_LATITUDE_SMOOTHING;
-      const ufoProjected = projectMarker(ufoLat, ufoLng, phi, GLOBE_THETA, aspect);
+      const ufoProjected = projectMarker(
+        ufoLat,
+        ufoLng,
+        phi,
+        GLOBE_THETA,
+        aspect,
+      );
       placePulseElement(ufoEl, ufoProjected, viewport);
 
       frame = window.requestAnimationFrame(loop);

@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build --mode client && vite build",
+    "build": "tsc -b && vite build --mode client && vite build && bun run build:instrument",
+    "build:instrument": "bun build ./src/instrument.ts --target bun --outfile ./dist/instrument.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "PORT=${PORT:-7000} bun --preload ./dist/instrument.js dist/index.js"
+    "start": "PORT=${PORT:-7010} bun --preload ./dist/instrument.js dist/index.js",
+    "test:events": "bun scripts/send-test-events.ts"
   },
   "dependencies": {
     "@sentry/bun": "^10.45.0",
