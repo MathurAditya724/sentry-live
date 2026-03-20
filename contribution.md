@@ -13,6 +13,7 @@ bun install
 2. Start development server:
 
 ```bash
+cp .env.example .env.local
 bun run dev
 ```
 
@@ -20,6 +21,12 @@ bun run dev
 
 ```bash
 bun run test:events
+```
+
+Optional sender flags:
+
+```bash
+bun run test:events -- --host 127.0.0.1 --port 5556 --interval 80 --count 500
 ```
 
 ## Development workflow

@@ -29,6 +29,14 @@ This keeps the architecture simple and real-time friendly for a single deploymen
 - **SSE route**: `GET /stream`
 - **Health route**: `GET /healthz`
 
+Environment variables:
+
+- `PORT` (default `7000`)
+- `HOST` (default `127.0.0.1`)
+- `UDP_PORT` (default `5556`)
+- `SAMPLE_RATE` (default `0.05`)
+- `HEARTBEAT_MS` (default `3000`)
+
 Incoming UDP payload format:
 
 ```json
@@ -50,6 +58,19 @@ To push test events into UDP ingest:
 
 ```bash
 bun run test:events
+```
+
+Optional test sender flags:
+
+```bash
+bun run test:events -- --host 127.0.0.1 --port 5556 --interval 80 --count 500
+```
+
+Run production build locally:
+
+```bash
+bun run build
+bun run start
 ```
 
 ## Docker deployment
