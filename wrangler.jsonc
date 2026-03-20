@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sentry-live-orbital",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-03-20",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ORBITAL_HUB",
+        "class_name": "OrbitalHub"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "new_sqlite_classes": ["OrbitalHub"],
+      "tag": "v1"
+    }
+  ]
+}

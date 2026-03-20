@@ -1,73 +1,85 @@
-# React + TypeScript + Vite
+# Sentry Live Orbital (Vite + React + Hono + Cloudflare Workers)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project recreates the live orbital visualization style with:
 
-Currently, two official plugins are available:
+- Vite + React frontend
+- `cobe` for the globe rendering
+- Hono API on Cloudflare Workers
+- Durable Object fanout for SSE streaming
+- built-in simulated event generator
+- default upstream SSE stream from Sentry Orbital (`https://sentry.live/stream`)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Requirements
 
-## React Compiler
+- Bun 1.0+
+- Cloudflare account + Wrangler auth for deploy
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Install
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Local development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Run both the Worker API and Vite frontend together:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun run dev:all
 ```
+
+This starts:
+
+- Vite on `http://localhost:5173`
+- Worker on `http://127.0.0.1:8787`
+
+Vite proxies `/api/*` to the Worker.
+
+By default the frontend connects directly to the Orbital-style SSE endpoint:
+
+- `https://sentry.live/stream`
+
+If that external stream is unavailable, the app falls back to local Worker stream (`/api/stream`).
+
+## API routes
+
+- `GET /api/healthz`
+- `GET /api/stream` (SSE)
+- `POST /api/events`
+- `POST /api/simulate/start`
+- `POST /api/simulate/stop`
+- `GET /api/simulate/status`
+
+## Changing upstream stream URL
+
+Set this env var for frontend if you want a different upstream SSE source:
+
+```bash
+VITE_SENTRY_ORBITAL_STREAM_URL=https://your-stream.example.com/stream
+```
+
+Event payload shape:
+
+```json
+{
+  "lat": 37.8,
+  "lng": -122.4,
+  "platform": "javascript",
+  "ts": 1760000000000
+}
+```
+
+## Build and checks
+
+```bash
+bun run lint
+bun run build
+```
+
+## Deploy
+
+```bash
+bun run deploy
+```
+
+Durable Object binding is configured in `wrangler.jsonc` with class `OrbitalHub`.

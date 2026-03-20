@@ -1,1 +1,142 @@
 @import "tailwindcss";
+
+:root {
+  --ink-1: #f4f2fa;
+  --ink-2: #c8c0dc;
+  --bg-1: #090711;
+  --bg-2: #1b1330;
+  --bg-3: #2d1e4f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--ink-1);
+  background: radial-gradient(circle at 20% 15%, #261c44 0%, transparent 38%),
+    radial-gradient(circle at 85% 80%, #1a3550 0%, transparent 32%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-2) 45%, var(--bg-3));
+  overflow: hidden;
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.orbital-glow {
+  position: absolute;
+  inset: 10% 20%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(158 117 255 / 24%) 0%, rgb(72 212 255 / 8%) 40%, transparent 72%);
+  filter: blur(30px);
+  pointer-events: none;
+}
+
+.globe-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.globe-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+  width: min(86vmin, 720px);
+  height: min(86vmin, 720px);
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  pointer-events: auto;
+}
+
+.globe-pulse-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.event-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  translate: -50% -50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.22s linear, filter 0.22s linear;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+
+.ufo-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  translate: -50% -62%;
+  width: 138px;
+  height: 196px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: opacity 0.24s linear;
+  transform-origin: center 65%;
+  z-index: 3;
+}
+
+.ufo-seer {
+  width: 106px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 0 20px rgb(158 117 255 / 58%));
+}
+
+.event-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid color-mix(in srgb, var(--pulse-color, #f4f2fa) 88%, transparent);
+  border-radius: 9999px;
+  opacity: 0;
+  animation: pulse-expand 1.8s ease-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.event-pulse-ring:nth-child(2) {
+  animation-delay: calc(var(--delay, 0s) + 0.45s);
+}
+
+.event-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--pulse-color, #f4f2fa) 95%, white 5%);
+  box-shadow: 0 0 0 2px rgb(9 7 17 / 72%), 0 0 0 4px color-mix(in srgb, var(--pulse-color, #f4f2fa) 80%, transparent);
+}
+
+@keyframes pulse-expand {
+  0% {
+    transform: scale(0.28);
+    opacity: 0.82;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
