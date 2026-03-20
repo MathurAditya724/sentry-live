@@ -11,9 +11,6 @@ type OrbitalEvent = {
 const app = new Hono<{ Bindings: { vite?: ViteDevServer } }>();
 const encoder = new TextEncoder();
 
-const readTextFile = async (path: string) => Bun.file(new URL(path, import.meta.url)).text();
-const readBinaryFile = async (path: string) => Bun.file(new URL(path, import.meta.url)).arrayBuffer();
-
 const platforms = [
   "javascript",
   "javascript",
@@ -257,15 +254,17 @@ app.get("/api/simulate/status", (c) => c.json({ ok: true, simulating }));
 if (import.meta.env.PROD) {
   app.get("/assets/*", async (c) => {
     const path = c.req.path.replace(/^\//, "");
-    const filePath = new URL(`../dist/static/${path.replace(/^assets\//, "assets/")}`, import.meta.url);
+    const filePath = new URL(
+      `../dist/static/${path.replace(/^assets\//, "assets/")}`,
+      import.meta.url,
+    );
     try {
       const body = await Bun.file(filePath).arrayBuffer();
-      const type =
-        path.endsWith(".css")
-          ? "text/css; charset=utf-8"
-          : path.endsWith(".js")
-            ? "application/javascript; charset=utf-8"
-            : "application/octet-stream";
+      const type = path.endsWith(".css")
+        ? "text/css; charset=utf-8"
+        : path.endsWith(".js")
+          ? "application/javascript; charset=utf-8"
+          : "application/octet-stream";
       return new Response(body, { headers: { "content-type": type } });
     } catch {
       return c.notFound();
@@ -281,13 +280,14 @@ if (import.meta.env.PROD) {
   for (const [route, fileName] of Object.entries(staticFiles)) {
     app.get(route, async (c) => {
       try {
-        const body = await readBinaryFile(`../dist/static/${fileName}`);
-        const type =
-          fileName.endsWith(".svg")
-            ? "image/svg+xml"
-            : fileName.endsWith(".png")
-              ? "image/png"
-              : "application/octet-stream";
+        const body = await Bun.file(
+          new URL(`../dist/static/${fileName}`, import.meta.url),
+        ).arrayBuffer();
+        const type = fileName.endsWith(".svg")
+          ? "image/svg+xml"
+          : fileName.endsWith(".png")
+            ? "image/png"
+            : "application/octet-stream";
         return new Response(body, { headers: { "content-type": type } });
       } catch {
         return c.notFound();
@@ -297,7 +297,12 @@ if (import.meta.env.PROD) {
 }
 
 app.get("*", async (c) => {
-  const html = await readTextFile(import.meta.env.PROD ? "./static/index.html" : "../index.html");
+  const html = await Bun.file(
+    new URL(
+      import.meta.env.PROD ? "./static/index.html" : "../index.html",
+      import.meta.url,
+    ),
+  ).text();
 
   if (import.meta.env.DEV && c.env.vite) {
     const transformed = await c.env.vite.transformIndexHtml(c.req.url, html);
