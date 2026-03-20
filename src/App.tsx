@@ -14,6 +14,7 @@ function App() {
   const { sampledLabel, feed, markers, isConnected } = useEventStream();
   const [collapsed, setCollapsed] = useState(false);
   const [running, setRunning] = useState(false);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     fetch("/api/simulate/status")
@@ -29,9 +30,11 @@ function App() {
           return;
         }
 
-        return fetch("/api/simulate/start", { method: "POST" }).then((response) => {
-          setRunning(response.ok);
-        });
+        return fetch("/api/simulate/start", { method: "POST" }).then(
+          (response) => {
+            setRunning(response.ok);
+          },
+        );
       })
       .catch(() => {
         setRunning(false);
@@ -121,7 +124,15 @@ function App() {
                   key={item.id}
                   className="flex justify-between gap-2.5 border-t border-white/10 px-3.5 py-2.5 text-[0.86rem]"
                 >
-                  <strong className="capitalize">{item.platform}</strong>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{
+                        backgroundColor: `rgb(${Math.round(item.color[0] * 255)} ${Math.round(item.color[1] * 255)} ${Math.round(item.color[2] * 255)})`,
+                      }}
+                    />
+                    <strong className="capitalize">{item.platform}</strong>
+                  </div>
                   <span className="text-[#c8c0dc] [font-variant-numeric:tabular-nums]">
                     {formatCoordinate(item.lat, "N", "S")}{" "}
                     {formatCoordinate(item.lng, "E", "W")}
@@ -131,6 +142,10 @@ function App() {
             </ul>
           )}
         </aside>
+
+        <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[0.7rem] tracking-[0.08em] text-white/55">
+          {`\u00A9 ${currentYear} Sentry`}
+        </p>
       </main>
     </div>
   );

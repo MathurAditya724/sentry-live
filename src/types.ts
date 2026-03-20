@@ -18,4 +18,5 @@ export type FeedItem = {
   platform: string;
   lat: number;
   lng: number;
+  color: [number, number, number];
 };

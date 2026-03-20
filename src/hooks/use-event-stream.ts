@@ -45,6 +45,7 @@ function toFeed(event: OrbitalEvent): FeedItem {
     platform: event.platform,
     lat: event.lat,
     lng: event.lng,
+    color: PLATFORM_COLORS[event.platform] ?? DEFAULT_COLOR,
   };
 }
 
