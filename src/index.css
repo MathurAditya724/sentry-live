@@ -23,10 +23,50 @@ body,
 body {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
   color: var(--ink-1);
-  background: radial-gradient(circle at 20% 15%, #261c44 0%, transparent 38%),
-    radial-gradient(circle at 85% 80%, #1a3550 0%, transparent 32%),
-    linear-gradient(160deg, var(--bg-1), var(--bg-2) 45%, var(--bg-3));
+  background:
+    radial-gradient(circle at 50% 120%, rgb(61 41 107 / 56%) 0%, transparent 42%),
+    radial-gradient(circle at 16% 12%, rgb(83 52 153 / 28%) 0%, transparent 34%),
+    radial-gradient(circle at 88% 72%, rgb(38 119 157 / 24%) 0%, transparent 32%),
+    linear-gradient(180deg, #05030a 0%, #0b0815 45%, #130d26 100%);
   overflow: hidden;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+}
+
+body::before {
+  background-image:
+    radial-gradient(1px 1px at 8% 12%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(1.2px 1.2px at 22% 34%, rgb(222 233 255 / 0.85), transparent),
+    radial-gradient(1px 1px at 39% 18%, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1.1px 1.1px at 62% 27%, rgb(206 225 255 / 0.82), transparent),
+    radial-gradient(1px 1px at 78% 9%, rgb(255 255 255 / 0.86), transparent),
+    radial-gradient(1.4px 1.4px at 90% 35%, rgb(238 245 255 / 0.9), transparent),
+    radial-gradient(1px 1px at 14% 58%, rgb(231 240 255 / 0.82), transparent),
+    radial-gradient(1.2px 1.2px at 33% 69%, rgb(255 255 255 / 0.86), transparent),
+    radial-gradient(1px 1px at 52% 52%, rgb(220 233 255 / 0.8), transparent),
+    radial-gradient(1.3px 1.3px at 69% 64%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(1px 1px at 85% 79%, rgb(216 230 255 / 0.78), transparent),
+    radial-gradient(1.2px 1.2px at 95% 57%, rgb(255 255 255 / 0.86), transparent);
+  opacity: 0.7;
+  animation: star-drift 120s linear infinite;
+}
+
+body::after {
+  background-image:
+    radial-gradient(1.6px 1.6px at 18% 22%, rgb(255 255 255 / 0.95), transparent),
+    radial-gradient(1.9px 1.9px at 48% 8%, rgb(210 230 255 / 0.92), transparent),
+    radial-gradient(1.7px 1.7px at 74% 29%, rgb(255 255 255 / 0.94), transparent),
+    radial-gradient(1.5px 1.5px at 28% 82%, rgb(220 236 255 / 0.9), transparent),
+    radial-gradient(1.8px 1.8px at 64% 68%, rgb(255 255 255 / 0.94), transparent),
+    radial-gradient(1.6px 1.6px at 92% 74%, rgb(214 231 255 / 0.9), transparent);
+  opacity: 0.55;
+  animation: star-twinkle 9s ease-in-out infinite alternate;
 }
 
 .app-shell {
@@ -39,8 +79,8 @@ body {
   position: absolute;
   inset: 10% 20%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(158 117 255 / 24%) 0%, rgb(72 212 255 / 8%) 40%, transparent 72%);
-  filter: blur(30px);
+  background: radial-gradient(circle, rgb(158 117 255 / 20%) 0%, rgb(72 212 255 / 6%) 44%, transparent 72%);
+  filter: blur(44px);
   pointer-events: none;
 }
 
@@ -138,5 +178,23 @@ body {
   100% {
     transform: scale(1.4);
     opacity: 0;
+  }
+}
+
+@keyframes star-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-6%, -4%, 0);
+  }
+}
+
+@keyframes star-twinkle {
+  0% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0.72;
   }
 }
