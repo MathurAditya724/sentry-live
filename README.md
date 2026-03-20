@@ -82,4 +82,4 @@ docker run --rm -p 7000:7000 -p 5556:5556/udp -e HOST=0.0.0.0 sentry-live-orbita
 
 ## Contributing
 
-See `contribution.md` for setup, workflow, and PR guidance.
+See `CONTRIBUTING.md` for setup, workflow, and PR guidance.
