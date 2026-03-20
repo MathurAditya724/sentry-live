@@ -1,9 +1,19 @@
 type SeerToastProps = {
-  onAction: () => void;
+  title: string;
+  description: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
   onClose: () => void;
 };
 
-export function SeerToast({ onAction, onClose }: SeerToastProps) {
+export function SeerToast({
+  title,
+  description,
+  action,
+  onClose,
+}: SeerToastProps) {
   return (
     <div className="relative w-[calc(100vw-1.6rem)] overflow-hidden rounded-xl border border-[#a889ff]/45 bg-[linear-gradient(180deg,rgba(18,12,32,0.96),rgba(12,8,22,0.96))] text-[#ece8fa] shadow-[0_24px_72px_rgba(7,4,14,0.8)] backdrop-blur-xl sm:w-[372px]">
       <button
@@ -21,21 +31,23 @@ export function SeerToast({ onAction, onClose }: SeerToastProps) {
         <div className="mb-2 flex items-center gap-2.5">
           <span className="h-2.5 w-2.5 rounded-full bg-[#b896ff] shadow-[0_0_0_4px_rgba(184,150,255,0.2)]" />
           <span className="text-[0.67rem] font-semibold tracking-[0.13em] text-[#ddcffd] uppercase">
-            Seer Sighting
+            {title}
           </span>
         </div>
 
         <p className="m-0 text-[0.83rem] leading-relaxed text-[#e7defb]">
-          Unidentified Failure Object spotted. Seer scans your issue context and points you straight to a fix.
+          {description}
         </p>
 
-        <button
-          type="button"
-          className="mt-3 h-9 w-full rounded-md border border-[#b896ff]/50 bg-[#b896ff]/18 px-3 text-xs font-semibold tracking-[0.01em] text-[#faf7ff] transition hover:border-[#c7abff]/65 hover:bg-[#b896ff]/28"
-          onClick={onAction}
-        >
-          Check out Seer
-        </button>
+        {action && (
+          <button
+            type="button"
+            className="mt-3 h-9 w-full rounded-md border border-[#b896ff]/50 bg-[#b896ff]/18 px-3 text-xs font-semibold tracking-[0.01em] text-[#faf7ff] transition hover:border-[#c7abff]/65 hover:bg-[#b896ff]/28"
+            onClick={action.onClick}
+          >
+            {action.label}
+          </button>
+        )}
       </div>
     </div>
   );

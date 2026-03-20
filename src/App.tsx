@@ -30,16 +30,12 @@ function App() {
   }, []);
 
   const onSeerClick = () => {
+    // Use this space for Cyber Monday, Black Friday, and other fun campaign copy (not sales/promotional pricing).
     toast.custom(
       () => (
         <SeerToast
-          onAction={() => {
-            window.open(
-              "https://sentry.io/product/seer/?original_referrer=https://live.sentry.io",
-              "_blank",
-              "noopener,noreferrer",
-            );
-          }}
+          title="Unknown Fun Object"
+          description="Did you just spot a UFO? It’s either aliens or another edge case from Friday deploys."
           onClose={() => {
             toast.dismiss("seer-info");
           }}
@@ -152,7 +148,11 @@ function App() {
 
       <Toaster
         position="top-right"
-        offset={isMobile ? { top: "5.4rem", right: "0.8rem" } : { top: "5rem", right: "1rem" }}
+        offset={
+          isMobile
+            ? { top: "5.4rem", right: "0.8rem" }
+            : { top: "5rem", right: "1rem" }
+        }
         visibleToasts={1}
       />
     </div>
