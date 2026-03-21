@@ -1,35 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import { Toaster, toast } from "sonner";
 import { CobeGlobe } from "./components/cobe-globe";
+import { LiveFeed } from "./components/live-feed";
 import { SeerToast } from "./components/seer-toast";
 import { useEventStream } from "./hooks/use-event-stream";
 
-function formatCoordinate(
-  value: number,
-  positive: string,
-  negative: string,
-): string {
-  return `${Math.abs(value).toFixed(1)}${value >= 0 ? positive : negative}`;
-}
-
 function App() {
   const { sampledLabel, feed, markers, isConnected } = useEventStream();
-  const [collapsed, setCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    const onResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
-  const onSeerClick = () => {
+  const onSeerClick = useCallback(() => {
     // Use this space for Cyber Monday, Black Friday, and other fun campaign copy (not sales/promotional pricing).
     toast.custom(
       () => (
@@ -52,7 +32,7 @@ function App() {
         },
       },
     );
-  };
+  }, []);
 
   return (
     <div className="app-shell">
@@ -106,40 +86,7 @@ function App() {
           </div>
         </header>
 
-        <aside className="live-feed-panel pointer-events-auto w-full overflow-hidden rounded-xl border border-[#9e75ff]/30 bg-[#0a0813]/70 backdrop-blur-xl md:max-w-[350px] md:self-end">
-          <button
-            type="button"
-            className="flex w-full cursor-pointer justify-between bg-white/5 px-3.5 py-2.5 text-xs tracking-[0.09em] text-[#f4f2fa] uppercase"
-            onClick={() => setCollapsed((value) => !value)}
-          >
-            <span>Live events</span>
-            <span>{collapsed ? "+" : "-"}</span>
-          </button>
-          {!collapsed && (
-            <ul className="m-0 max-h-[270px] list-none overflow-auto p-0">
-              {feed.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex justify-between gap-2.5 border-t border-white/10 px-3.5 py-2.5 text-[0.86rem]"
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{
-                        backgroundColor: `rgb(${Math.round(item.color[0] * 255)} ${Math.round(item.color[1] * 255)} ${Math.round(item.color[2] * 255)})`,
-                      }}
-                    />
-                    <strong className="capitalize">{item.platform}</strong>
-                  </div>
-                  <span className="text-[#c8c0dc] [font-variant-numeric:tabular-nums]">
-                    {formatCoordinate(item.lat, "N", "S")}{" "}
-                    {formatCoordinate(item.lng, "E", "W")}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </aside>
+        <LiveFeed feed={feed} />
 
         <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[0.7rem] tracking-[0.08em] text-white/55">
           {`\u00A9 ${currentYear} Sentry`}
@@ -148,11 +95,7 @@ function App() {
 
       <Toaster
         position="top-right"
-        offset={
-          isMobile
-            ? { top: "5.4rem", right: "0.8rem" }
-            : { top: "5rem", right: "1rem" }
-        }
+        offset={{ top: "calc(5rem + env(safe-area-inset-top))", right: "0.8rem" }}
         visibleToasts={1}
       />
     </div>

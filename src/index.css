@@ -116,6 +116,11 @@ body::after {
   pointer-events: none;
 }
 
+.live-feed-list {
+  content-visibility: auto;
+  contain-intrinsic-size: 270px;
+}
+
 .event-pulse {
   position: absolute;
   top: 0;
@@ -164,15 +169,14 @@ body::after {
 .event-pulse-ring {
   position: absolute;
   inset: 0;
-  border: 5.2px solid color-mix(in srgb, var(--pulse-color, #f4f2fa) 88%, transparent);
+  border: 6px solid color-mix(in srgb, var(--pulse-color, #f4f2fa) 86%, transparent);
   border-radius: 9999px;
   opacity: 0;
-  animation: pulse-expand 2.2s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
-  animation-delay: var(--delay, 0s);
-}
-
-.event-pulse-ring:nth-child(2) {
-  animation-delay: calc(var(--delay, 0s) + 0.45s);
+  filter: blur(0.9px);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--pulse-color, #f4f2fa) 56%, transparent);
+  animation:
+    pulse-expand 1.85s cubic-bezier(0.22, 0.61, 0.36, 1) infinite,
+    pulse-drift 6.8s ease-in-out infinite alternate;
 }
 
 .event-pulse-dot {
@@ -185,15 +189,24 @@ body::after {
 
 @keyframes pulse-expand {
   0% {
-    transform: scale(0.22);
-    opacity: 0.7;
+    transform: scale(0.5);
+    opacity: 0.58;
   }
-  45% {
-    opacity: 0.48;
+  60% {
+    opacity: 0.28;
   }
   100% {
-    transform: scale(1.95);
+    transform: scale(1.68);
     opacity: 0;
+  }
+}
+
+@keyframes pulse-drift {
+  0% {
+    filter: blur(0.9px) hue-rotate(-8deg) saturate(1.02);
+  }
+  100% {
+    filter: blur(0.9px) hue-rotate(12deg) saturate(1.14);
   }
 }
 

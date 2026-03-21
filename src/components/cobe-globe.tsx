@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import createGlobe from "cobe";
+import { WebHaptics } from "web-haptics";
 import type { MarkerPoint } from "../types";
 
 type Props = {
@@ -14,8 +15,6 @@ const GLOBE_AUTO_ROTATE_SPEED = 0.00145;
 const GLOBE_MARKER_SIZE = 0.02;
 const GLOBE_MAP_BRIGHTNESS = 5;
 const GLOBE_BASE_COLOR: [number, number, number] = [0.34, 0.24, 0.56];
-const PULSE_DELAY_STEP = 0.2;
-const PULSE_DELAY_COUNT = 6;
 const POINTER_VELOCITY_DAMPING = 0.92;
 const POINTER_VELOCITY_FACTOR = 0.0007;
 const POINTER_ROTATION_FACTOR = 0.0035;
@@ -90,21 +89,17 @@ function randomRange(min: number, max: number): number {
 
 function createPulseElement(
   marker: MarkerPoint,
-  delay: number,
 ): HTMLDivElement {
   const element = document.createElement("div");
   element.className = "event-pulse";
-  element.style.setProperty("--delay", `${delay}s`);
   element.style.setProperty("--pulse-color", colorToCss(marker.color));
 
   const ringA = document.createElement("span");
   ringA.className = "event-pulse-ring";
-  const ringB = document.createElement("span");
-  ringB.className = "event-pulse-ring";
   const dot = document.createElement("span");
   dot.className = "event-pulse-dot";
 
-  element.append(ringA, ringB, dot);
+  element.append(ringA, dot);
   return element;
 }
 
@@ -115,23 +110,16 @@ function syncPulseElements(
 ) {
   const activeIds = new Set<string>();
 
-  markers.forEach((marker, index) => {
+  markers.forEach((marker) => {
     activeIds.add(marker.id);
 
     let pulseEl = pulseEls.get(marker.id);
     if (!pulseEl) {
-      pulseEl = createPulseElement(
-        marker,
-        (index % PULSE_DELAY_COUNT) * PULSE_DELAY_STEP,
-      );
+      pulseEl = createPulseElement(marker);
       pulseEls.set(marker.id, pulseEl);
       layer.append(pulseEl);
     }
 
-    pulseEl.style.setProperty(
-      "--delay",
-      `${(index % PULSE_DELAY_COUNT) * PULSE_DELAY_STEP}s`,
-    );
     pulseEl.style.setProperty("--pulse-color", colorToCss(marker.color));
   });
 
@@ -236,6 +224,7 @@ export function CobeGlobe({ markers, onSeerClick }: Props) {
     ufoEl.innerHTML = '<img class="ufo-seer" src="/seer.png" alt="Seer" />';
     pulseLayer.append(ufoEl);
     const ufoImage = ufoEl.querySelector<HTMLImageElement>(".ufo-seer");
+    const haptics = new WebHaptics();
 
     const pulseEls = new Map<string, HTMLDivElement>();
 
@@ -351,6 +340,7 @@ export function CobeGlobe({ markers, onSeerClick }: Props) {
       void ufoImage.offsetWidth;
       ufoImage.classList.add("ufo-seer--wiggle");
       onSeerClickRef.current?.();
+      void haptics.trigger("nudge");
     };
 
     const onSeerAnimationEnd = () => {
@@ -372,6 +362,7 @@ export function CobeGlobe({ markers, onSeerClick }: Props) {
       ufoImage?.removeEventListener("click", onSeerImageClick);
       ufoImage?.removeEventListener("animationend", onSeerAnimationEnd);
       window.cancelAnimationFrame(frame);
+      haptics.destroy();
       ufoEl.remove();
       pulseLayer.remove();
       globe.destroy();

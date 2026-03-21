@@ -20,7 +20,7 @@ const DEFAULT_COLOR: [number, number, number] = [0.62, 0.53, 1];
 const FEED_LIMIT_DESKTOP = 12;
 const FEED_LIMIT_MOBILE = 5;
 const MARKER_LIMIT = 36;
-const MARKER_TTL_MS = 8_000;
+const MARKER_TTL_MS = 6_000;
 const MARKER_RATE_MS = 170;
 const MARKER_MAX_PER_MESSAGE = 3;
 const MOBILE_WIDTH = 640;
@@ -97,19 +97,23 @@ function extractEvents(payload: unknown): OrbitalEvent[] {
       return [tuple];
     }
 
-    const batchedTuples = payload
-      .map((item) => asEventTuple(item))
-      .filter((item): item is OrbitalEvent => item !== null);
+    const batchedTuples: OrbitalEvent[] = [];
+    const batchedObjects: OrbitalEvent[] = [];
 
-    if (batchedTuples.length > 0) {
-      return batchedTuples;
+    for (const item of payload) {
+      const asTuple = asEventTuple(item);
+      if (asTuple) {
+        batchedTuples.push(asTuple);
+        continue;
+      }
+
+      const asObject = asEventObject(item);
+      if (asObject) {
+        batchedObjects.push(asObject);
+      }
     }
 
-    const batchedObjects = payload
-      .map((item) => asEventObject(item))
-      .filter((item): item is OrbitalEvent => item !== null);
-
-    return batchedObjects;
+    return batchedTuples.length > 0 ? batchedTuples : batchedObjects;
   }
 
   if (payload && typeof payload === "object" && !Array.isArray(payload)) {
@@ -194,11 +198,19 @@ export function useEventStream() {
       }
 
       const now = Date.now();
-      const fresh = events
-        .filter((event) => now - event.ts <= 10_000)
-        .sort((a, b) => a.ts - b.ts);
+      const fresh: OrbitalEvent[] = [];
+      for (const event of events) {
+        if (now - event.ts <= 10_000) {
+          fresh.push(event);
+        }
+      }
+
       if (fresh.length === 0) {
         return;
+      }
+
+      if (fresh.length > 1) {
+        fresh.sort((a, b) => a.ts - b.ts);
       }
 
       setSampled((current) => current + fresh.length);
