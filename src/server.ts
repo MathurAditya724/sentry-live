@@ -4,6 +4,7 @@ import type { ViteDevServer } from "vite";
 const encoder = new TextEncoder();
 
 const HOST = process.env.HOST ?? "127.0.0.1";
+const PORT = Number(process.env.PORT ?? 7000);
 const UDP_PORT = Number(process.env.UDP_PORT ?? 5556);
 const SAMPLE_RATE = Math.max(0, Math.min(1, Number(process.env.SAMPLE_RATE ?? 0.05)));
 const HEARTBEAT_MS = Number(process.env.HEARTBEAT_MS ?? 3000);
@@ -199,5 +200,15 @@ app.get("*", async (c) => {
 
   return c.html(html);
 });
+
+if (import.meta.main) {
+  Bun.serve({
+    hostname: HOST,
+    port: PORT,
+    fetch: app.fetch,
+  });
+
+  console.log(`[orbital] HTTP listening on http://${HOST}:${PORT}`);
+}
 
 export default app;

@@ -9,7 +9,7 @@
     "build:instrument": "bun build ./src/instrument.ts --target bun --outfile ./dist/instrument.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "bun --preload ./dist/instrument.js dist/index.js",
+    "start": "bun --preload ./dist/instrument.js ./start-server.mjs",
     "test:events": "bun scripts/send-test-events.ts"
   },
   "dependencies": {

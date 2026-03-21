@@ -19,8 +19,9 @@ ENV UDP_PORT=5556
 ENV SAMPLE_RATE=0.05
 
 COPY --from=builder /app/dist ./dist
+COPY start-server.mjs ./start-server.mjs
 
 EXPOSE 7000
 EXPOSE 5556/udp
 
-CMD ["bun", "run", "start"]
+CMD ["--preload", "./dist/instrument.js", "./start-server.mjs"]
